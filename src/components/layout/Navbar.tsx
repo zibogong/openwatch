@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
@@ -18,13 +19,14 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
         <Link href="/dashboard" className="shrink-0">
-          <div className="bg-card border border-border rounded-xl px-4 py-2 shadow-sm">
-            <span
-              className="text-base font-bold tracking-tight"
-              style={{ fontFamily: 'var(--font-heading), Georgia, serif' }}
-            >
-              OpenWatch
-            </span>
+          <div className="bg-card border border-border rounded-xl px-2 py-1 shadow-sm">
+            {/* Show full logo image — contains icon + OPENWATCH wordmark */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-white.png"
+              alt="OpenWatch"
+              style={{ height: 36, width: 'auto', display: 'block' }}
+            />
           </div>
         </Link>
 
@@ -49,7 +51,7 @@ export function Navbar() {
           })}
         </nav>
 
-        {/* Right slot — sync indicator */}
+        {/* Right slot */}
         <div className="bg-card border border-border rounded-xl px-4 py-2 shadow-sm">
           <span className="text-xs text-muted-foreground font-medium tracking-wide">
             Anthropic Monitor
