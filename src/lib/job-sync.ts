@@ -35,6 +35,25 @@ export async function syncJobs(): Promise<SyncResult> {
     return { jobsFetched: 0, newJobs: 0, closedJobs: 0, insightsDone: 0, durationMs: 0 }
   }
 
+  // Wrap everything so failures are always logged to sync_runs
+  try {
+    return await _syncJobs(start)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    const durationMs = Date.now() - start
+    await sql`
+      INSERT INTO sync_runs (jobs_fetched, new_jobs, closed_jobs, insights_done, error_message, duration_ms)
+      VALUES (0, 0, 0, 0, ${message}, ${durationMs})
+    `.catch(() => {}) // don't throw if DB itself is down
+    throw err
+  }
+}
+
+async function _syncJobs(start: number): Promise<SyncResult> {
+  let newJobCount = 0
+  let closedJobCount = 0
+  let insightsDone = 0
+
   // 1. Fetch from Greenhouse
   const apiJobs = await fetchAllJobs()
   const apiIds = new Set(apiJobs.map((j) => j.id))
