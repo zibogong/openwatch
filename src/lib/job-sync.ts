@@ -56,6 +56,9 @@ async function _syncJobs(start: number): Promise<SyncResult> {
 
   // 1. Fetch from Greenhouse
   const apiJobs = await fetchAllJobs()
+  if (apiJobs.length === 0) {
+    throw new Error('Greenhouse API returned 0 jobs — aborting sync to prevent mass-close')
+  }
   const apiIds = new Set(apiJobs.map((j) => j.id))
 
   // 2. Get all currently-active jobs from DB

@@ -27,7 +27,10 @@ async function fetchWithRetry(url: string, retries = 3): Promise<Response> {
 export async function fetchAllJobs(): Promise<GreenhouseJob[]> {
   const res = await fetchWithRetry(`${BASE_URL}/jobs?content=true`)
   const data: GreenhouseJobsResponse = await res.json()
-  return data.jobs ?? []
+  if (!Array.isArray(data.jobs)) {
+    throw new Error(`Greenhouse API returned unexpected response: jobs field missing or not an array`)
+  }
+  return data.jobs
 }
 
 export async function fetchJob(id: number): Promise<GreenhouseJob> {
