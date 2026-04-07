@@ -129,7 +129,11 @@ async function _syncJobs(start: number): Promise<SyncResult> {
   }
 
   // 8. Generate insights for new jobs + retry backfill (up to 10)
-  const pendingInsights = await sql`
+  if (!process.env.ANTHROPIC_API_KEY) {
+    console.warn('Skipping insight generation: ANTHROPIC_API_KEY not set')
+  }
+
+  const pendingInsights = !process.env.ANTHROPIC_API_KEY ? [] : await sql`
     SELECT id, title, department_name, location_name, content_html
     FROM jobs
     WHERE insight_generated_at IS NULL
