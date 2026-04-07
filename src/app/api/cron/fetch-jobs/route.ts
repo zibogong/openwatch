@@ -3,13 +3,11 @@ import { syncJobs } from '@/lib/job-sync'
 
 export const maxDuration = 60
 
-export async function POST(req: NextRequest) {
-  // Vercel cron auth — skip in dev
-  if (process.env.NODE_ENV === 'production') {
-    const authHeader = req.headers.get('authorization')
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+async function handler(req: NextRequest) {
+  // Vercel cron sends GET with Authorization: Bearer <CRON_SECRET>
+  const authHeader = req.headers.get('authorization')
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   try {
@@ -22,10 +20,5 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Allow GET for manual triggering in dev
-export async function GET(req: NextRequest) {
-  if (process.env.NODE_ENV === 'production') {
-    return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
-  }
-  return POST(req)
-}
+export const GET = handler
+export const POST = handler
