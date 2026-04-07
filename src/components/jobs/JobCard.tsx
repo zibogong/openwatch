@@ -5,14 +5,16 @@ import type { JobRow } from '@/types/db'
 
 interface Props {
   job: JobRow
+  previousSync?: string | null
 }
 
-const ONE_DAY_MS = 86400000
-
-export function JobCard({ job }: Props) {
+export function JobCard({ job, previousSync }: Props) {
+  // A job is truly "new" only if it first appeared after the previous sync run.
+  // This prevents a full re-seed from marking all jobs as new.
   const isNew =
     job.status === 'active' &&
-    Date.now() - new Date(job.first_seen_at).getTime() < ONE_DAY_MS * 3
+    !!previousSync &&
+    new Date(job.first_seen_at) > new Date(previousSync)
 
   return (
     <Link href={`/jobs/${job.id}`} className="block group">

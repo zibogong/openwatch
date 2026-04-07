@@ -1,11 +1,10 @@
 'use client'
 import Link from 'next/link'
 import { useJobs } from '@/hooks/useJobs'
+import { useStats } from '@/hooks/useStats'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatRelative } from '@/lib/utils'
 import { cn } from '@/lib/utils'
-
-const ONE_DAY_MS = 86400000
 
 interface Props {
   dark?: boolean
@@ -14,13 +13,16 @@ interface Props {
 export function RecentChanges({ dark }: Props) {
   const { data: newData, isLoading: newLoading } = useJobs({ status: 'active', limit: 6 })
   const { data: closedData, isLoading: closedLoading } = useJobs({ status: 'closed', limit: 4 })
+  const { data: stats } = useStats()
+
+  const previousSync = stats?.previous_sync ? new Date(stats.previous_sync) : null
 
   const recentNew = newData?.jobs.filter(
-    (j) => Date.now() - new Date(j.first_seen_at).getTime() < ONE_DAY_MS * 7
+    (j) => previousSync && new Date(j.first_seen_at) > previousSync
   ) ?? []
 
   const recentClosed = closedData?.jobs.filter(
-    (j) => j.closed_at && Date.now() - new Date(j.closed_at).getTime() < ONE_DAY_MS * 7
+    (j) => j.closed_at && previousSync && new Date(j.closed_at) > previousSync
   ) ?? []
 
   const isLoading = newLoading || closedLoading

@@ -48,6 +48,7 @@ export interface StatsResponse {
   closed_this_week: number
   by_department: DepartmentStat[]
   last_sync: string | null
+  previous_sync: string | null
 }
 
 export interface SnapshotSeries {

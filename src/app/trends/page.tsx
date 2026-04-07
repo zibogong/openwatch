@@ -17,14 +17,15 @@ async function getStats(): Promise<StatsResponse> {
     FROM jobs WHERE status = 'active'
     GROUP BY department_name ORDER BY count DESC
   ` as { department: string | null; count: number }[]
-  const [lastSync] = await sql`SELECT ran_at FROM sync_runs ORDER BY ran_at DESC LIMIT 1` as { ran_at: string }[]
+  const syncRows = await sql`SELECT ran_at FROM sync_runs ORDER BY ran_at DESC LIMIT 2` as { ran_at: string }[]
 
   return {
     total_active: totalActive?.count ?? 0,
     new_this_week: newThisWeek?.count ?? 0,
     closed_this_week: closedThisWeek?.count ?? 0,
     by_department: byDept.map((r) => ({ department: r.department ?? 'Uncategorized', count: r.count })),
-    last_sync: lastSync?.ran_at ?? null,
+    last_sync: syncRows[0]?.ran_at ?? null,
+    previous_sync: syncRows[1]?.ran_at ?? null,
   }
 }
 

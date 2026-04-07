@@ -24,9 +24,13 @@ export async function GET() {
     ORDER BY count DESC
   ` as { department: string | null; count: number }[]
 
-  const [lastSync] = await sql`
-    SELECT ran_at FROM sync_runs ORDER BY ran_at DESC LIMIT 1
+  const syncRows = await sql`
+    SELECT ran_at FROM sync_runs ORDER BY ran_at DESC LIMIT 2
   ` as { ran_at: string }[]
+
+  const lastSync = syncRows[0]?.ran_at ?? null
+  // Previous sync time: used to decide if a job is truly "new" (appeared after last sync)
+  const previousSync = syncRows[1]?.ran_at ?? null
 
   return NextResponse.json({
     total_active: totalActive?.count ?? 0,
@@ -36,6 +40,7 @@ export async function GET() {
       department: r.department ?? 'Uncategorized',
       count: r.count,
     })),
-    last_sync: lastSync?.ran_at ?? null,
+    last_sync: lastSync,
+    previous_sync: previousSync,
   })
 }
