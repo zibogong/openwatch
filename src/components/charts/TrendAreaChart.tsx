@@ -29,7 +29,14 @@ export function TrendAreaChart({ series }: Props) {
     byTime.get(key)![row.department_name] = row.active_count
   }
 
-  const departments = [...deptSet].slice(0, 8) // top 8 for readability
+  // Only show departments that have active jobs in the most recent snapshot
+  const latestKey = [...byTime.keys()].at(-1)
+  const latestCounts = latestKey ? byTime.get(latestKey)! : {}
+  const activeDepts = [...deptSet].filter((d) => (latestCounts[d] ?? 0) > 0)
+  const departments = activeDepts
+    .sort((a, b) => (latestCounts[b] ?? 0) - (latestCounts[a] ?? 0))
+    .slice(0, 8)
+
   const chartData = [...byTime.entries()].map(([date, counts]) => ({
     date,
     ...counts,
