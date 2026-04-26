@@ -15,23 +15,24 @@ export async function GET(req: NextRequest) {
   if (department) {
     rows = await sql`
       SELECT * FROM jobs
-      WHERE insight_generated_at IS NOT NULL AND department_name = ${department}
+      WHERE insight_generated_at IS NOT NULL AND status = 'active' AND department_name = ${department}
       ORDER BY insight_generated_at DESC
       LIMIT ${limit} OFFSET ${offset}
     ` as JobRow[]
     countRows = await sql`
       SELECT COUNT(*)::int AS count FROM jobs
-      WHERE insight_generated_at IS NOT NULL AND department_name = ${department}
+      WHERE insight_generated_at IS NOT NULL AND status = 'active' AND department_name = ${department}
     ` as { count: number }[]
   } else {
     rows = await sql`
       SELECT * FROM jobs
-      WHERE insight_generated_at IS NOT NULL
+      WHERE insight_generated_at IS NOT NULL AND status = 'active'
       ORDER BY insight_generated_at DESC
       LIMIT ${limit} OFFSET ${offset}
     ` as JobRow[]
     countRows = await sql`
-      SELECT COUNT(*)::int AS count FROM jobs WHERE insight_generated_at IS NOT NULL
+      SELECT COUNT(*)::int AS count FROM jobs
+      WHERE insight_generated_at IS NOT NULL AND status = 'active'
     ` as { count: number }[]
   }
 
