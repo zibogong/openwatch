@@ -62,10 +62,11 @@ async function _syncJobs(start: number): Promise<SyncResult> {
   const apiIds = new Set(apiJobs.map((j) => j.id))
 
   // 2. Get all currently-active jobs from DB
+  // Neon returns BIGINT as string; normalize to number for Set comparison against Greenhouse IDs
   const activeRows = await sql`
     SELECT id FROM jobs WHERE status = 'active'
-  ` as { id: number }[]
-  const activeDbIds = new Set(activeRows.map((r) => r.id))
+  ` as { id: number | string }[]
+  const activeDbIds = new Set(activeRows.map((r) => Number(r.id)))
 
   // 3. Determine new / closed / existing
   const newJobs = apiJobs.filter((j) => !activeDbIds.has(j.id))
